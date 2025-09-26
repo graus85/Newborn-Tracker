@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#218085">
+    <title>Baby Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkJhYnkgVHJhY2tlciIsCiAgInNob3J0X25hbWUiOiAiQmFieVRyYWNrZXIiLAogICJkZXNjcmlwdGlvbiI6ICJUcmFjayB5b3VyIGJhYnkncyBkYWlseSBhY3Rpdml0aWVzIGFuZCBoZWFsdGgiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2ZjZmNmOSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTgwODUiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSGRwWkhSb1BTSXhNalFpSUdobGFXZG9kRDBpTVRJMElpQjJhV1YzUW05NFBTSXdJREFnTVRJMElERTBOQ0krUEdOcGNtTnNaU0JqZUQwaU5qSWlJR041UFNJMk1pSWdjajBpTlRBaUlHWnBiR3c5SWlNeU1UZ3dPRFVpTHo0Z1BIUmxlSFFnZUQwaU5qSWlJSGs5SWpneElpQm1hV3hzUFNJalptWm1JaUJtYjI1MExYTnBlbVU5SWpJd0lpQjBlWFIxWVc1amFHOXlQU0p0YVdSa2JHVWlQank4TDNSbGVIUStQQzl6ZG1jKyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjQiIGhlaWdodD0iMTI0IiB2aWV3Qm94PSIwIDAgMTI0IDE0NCI+PGNpcmNsZSBjeD0iNjIiIGN5PSI2MiIgcj0iNTAiIGZpbGw9IiMyMTgwODUiLz4gPHRleHQgeD0iNjIiIHk9IjgxIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7wn42MLz50ZXh0Pjwvc3ZnPg==">
+</head>
+<body>
+    <div id="app" class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="header-title">Baby Tracker</h1>
+                <div class="header-right">
+                    <span id="currentDate" class="current-date"></span>
+                    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Daily Log Tab -->
+            <div id="dailyLogTab" class="tab-content active">
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="feed">🍼</button>
+                    <button class="filter-btn" data-filter="diaper">👶</button>
+                    <button class="filter-btn" data-filter="sleep">😴</button>
+                    <button class="filter-btn" data-filter="vitamin">💊</button>
+                    <button class="filter-btn" data-filter="weight">⚖️</button>
+                    <button class="filter-btn" data-filter="height">📏</button>
+                    <button class="filter-btn" data-filter="other">📝</button>
+                </div>
+                <div id="eventsList" class="events-list">
+                    <!-- Events will be populated by JavaScript -->
+                </div>
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-icon">📝</div>
+                    <h3>No events yet</h3>
+                    <p>Tap the + button to add your first event</p>
+                </div>
+            </div>
+
+            <!-- Summary Tab -->
+            <div id="summaryTab" class="tab-content">
+                <div class="summary-header">
+                    <div class="period-selector">
+                        <button class="period-btn active" data-period="day">Day</button>
+                        <button class="period-btn" data-period="week">Week</button>
+                        <button class="period-btn" data-period="month">Month</button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🍼</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Total Feed</div>
+                            <div id="totalFeed" class="stat-value">0 ml</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">👶</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Diapers</div>
+                            <div id="totalDiapers" class="stat-value">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">😴</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Sleep Time</div>
+                            <div id="totalSleep" class="stat-value">0h 0m</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">💊</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Vitamins</div>
+                            <div id="totalVitamins" class="stat-value">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h3>Activity Timeline</h3>
+                    <div id="activityChart" class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Tab -->
+            <div id="moreTab" class="tab-content">
+                <div class="more-section">
+                    <h3>Baby Profile</h3>
+                    <div class="profile-card card">
+                        <div class="card__body">
+                            <div class="profile-item">
+                                <label class="form-label">Name</label>
+                                <input id="babyName" type="text" class="form-control" placeholder="Enter baby's name">
+                            </div>
+                            <div class="profile-item">
+                                <label class="form-label">Gender</label>
+                                <select id="babyGender" class="form-control">
+                                    <option value="Female">Female</option>
+                                    <option value="Male">Male</option>
+                                </select>
+                            </div>
+                            <div class="profile-item">
+                                <label class="form-label">Date of Birth</label>
+                                <input id="babyDob" type="date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="more-section">
+                    <h3>Settings</h3>
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <span>Theme</span>
+                            <button id="themeToggleSetting" class="setting-toggle">
+                                <span class="toggle-text">Light</span>
+                            </button>
+                        </div>
+                        <div class="setting-item">
+                            <span>Units</span>
+                            <button id="unitsToggle" class="setting-toggle">
+                                <span class="toggle-text">ml</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="more-section">
+                    <h3>Data</h3>
+                    <div class="data-actions">
+                        <button id="exportData" class="btn btn--outline btn--full-width">
+                            Export Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="more-section">
+                    <h3>About</h3>
+                    <p class="about-text">Baby Tracker helps you monitor your baby's daily activities, feeding, sleep, and growth patterns.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-tab="dailyLog">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">Daily Log</span>
+            </button>
+            <button class="nav-item" data-tab="summary">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Summary</span>
+            </button>
+            <button class="nav-item" data-tab="more">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">More</span>
+            </button>
+        </nav>
+
+        <!-- Floating Action Button -->
+        <button id="fab" class="fab" aria-label="Add event">
+            <span class="fab-icon">+</span>
+        </button>
+    </div>
+
+    <!-- Event Type Modal -->
+    <div id="eventTypeModal" class="modal hidden">
+        <div class="modal-overlay" id="eventTypeOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Event</h3>
+                <button id="closeEventType" class="modal-close">&times;</button>
+            </div>
+            <div class="event-types-grid">
+                <button class="event-type-btn" data-type="feed">
+                    <span class="event-type-icon">🍼</span>
+                    <span class="event-type-label">Feed</span>
+                </button>
+                <button class="event-type-btn" data-type="diaper">
+                    <span class="event-type-icon">👶</span>
+                    <span class="event-type-label">Diaper</span>
+                </button>
+                <button class="event-type-btn" data-type="sleep">
+                    <span class="event-type-icon">😴</span>
+                    <span class="event-type-label">Sleep</span>
+                </button>
+                <button class="event-type-btn" data-type="vitamin">
+                    <span class="event-type-icon">💊</span>
+                    <span class="event-type-label">Vitamin</span>
+                </button>
+                <button class="event-type-btn" data-type="weight">
+                    <span class="event-type-icon">⚖️</span>
+                    <span class="event-type-label">Weight</span>
+                </button>
+                <button class="event-type-btn" data-type="height">
+                    <span class="event-type-icon">📏</span>
+                    <span class="event-type-label">Height</span>
+                </button>
+                <button class="event-type-btn" data-type="other">
+                    <span class="event-type-icon">📝</span>
+                    <span class="event-type-label">Other</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Form Modal -->
+    <div id="eventFormModal" class="modal hidden">
+        <div class="modal-overlay" id="eventFormOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="eventFormTitle">Add Event</h3>
+                <button id="closeEventForm" class="modal-close">&times;</button>
+            </div>
+            <form id="eventForm" class="event-form">
+                <div id="formFields" class="form-fields">
+                    <!-- Dynamic form fields will be inserted here -->
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelEventForm" class="btn btn--secondary">Cancel</button>
+                    <button type="submit" class="btn btn--primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator hidden">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

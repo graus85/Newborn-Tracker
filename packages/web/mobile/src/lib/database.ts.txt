@@ -1,0 +1,259 @@
+import * as SQLite from 'expo-sqlite';
+import { generateEventId } from '@baby/domain';
+import type { Event, SyncQueueItem } from '@baby/domain';
+
+class MobileDatabase {
+  private db: SQLite.SQLiteDatabase | null = null;
+
+  async init(): Promise<void> {
+    if (this.db) return;
+
+    this.db = await SQLite.openDatabaseAsync('baby-tracker.db');
+
+    await this.createTables();
+  }
+
+  private async createTables(): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    // Events table
+    await this.db.execAsync(`
+      CREATE TABLE IF NOT EXISTS events (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        date TEXT NOT NULL,
+        type TEXT NOT NULL,
+        data TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    `);
+
+    // Sync queue table
+    await this.db.execAsync(`
+      CREATE TABLE IF NOT EXISTS sync_queue (
+        id TEXT PRIMARY KEY,
+        operation TEXT NOT NULL,
+        table_name TEXT NOT NULL,
+        record_id TEXT NOT NULL,
+        data TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        retry_count INTEGER DEFAULT 0,
+        last_error TEXT
+      );
+    `);
+
+    // Settings table
+    await this.db.execAsync(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+    `);
+
+    // Create indexes
+    await this.db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_events_user_date ON events(user_id, date);
+      CREATE INDEX IF NOT EXISTS idx_events_user_type ON events(user_id, type);
+      CREATE INDEX IF NOT EXISTS idx_sync_queue_timestamp ON sync_queue(timestamp);
+    `);
+  }
+
+  // Event operations
+  async getEvents(userId: string, date?: string): Promise<Event[]> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    let query = 'SELECT * FROM events WHERE user_id = ?';
+    const params: any[] = [userId];
+
+    if (date) {
+      query += ' AND date = ?';
+      params.push(date);
+    }
+
+    query += ' ORDER BY date DESC, created_at DESC';
+
+    const result = await this.db.getAllAsync(query, params);
+
+    return result.map((row: any) => ({
+      ...JSON.parse(row.data),
+      id: row.id,
+      user_id: row.user_id,
+      date: row.date,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    }));
+  }
+
+  async addEvent(event: Event): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const { id, user_id, date, created_at, updated_at, ...eventData } = event;
+
+    await this.db.runAsync(
+      'INSERT INTO events (id, user_id, date, type, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [
+        id,
+        user_id!,
+        date,
+        this.getEventType(event),
+        JSON.stringify(eventData),
+        created_at!,
+        updated_at!,
+      ]
+    );
+  }
+
+  async updateEvent(id: string, updates: Partial<Event>): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const existingEvent = await this.getEventById(id);
+    if (!existingEvent) throw new Error('Event not found');
+
+    const updatedEvent = {
+      ...existingEvent,
+      ...updates,
+      id,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { user_id, date, created_at, updated_at, ...eventData } = updatedEvent;
+
+    await this.db.runAsync(
+      'UPDATE events SET data = ?, updated_at = ? WHERE id = ?',
+      [JSON.stringify(eventData), updated_at, id]
+    );
+  }
+
+  async deleteEvent(id: string): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.runAsync('DELETE FROM events WHERE id = ?', [id]);
+  }
+
+  private async getEventById(id: string): Promise<Event | null> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.getFirstAsync(
+      'SELECT * FROM events WHERE id = ?',
+      [id]
+    ) as any;
+
+    if (!result) return null;
+
+    return {
+      ...JSON.parse(result.data),
+      id: result.id,
+      user_id: result.user_id,
+      date: result.date,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+    };
+  }
+
+  // Sync queue operations
+  async addToSyncQueue(item: Omit<SyncQueueItem, 'id'>): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const id = generateEventId();
+
+    await this.db.runAsync(
+      'INSERT INTO sync_queue (id, operation, table_name, record_id, data, timestamp, retry_count, last_error) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        id,
+        item.operation,
+        item.table,
+        item.record_id,
+        JSON.stringify(item.data),
+        item.timestamp,
+        item.retry_count || 0,
+        item.last_error || null,
+      ]
+    );
+  }
+
+  async getSyncQueue(): Promise<SyncQueueItem[]> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.getAllAsync(
+      'SELECT * FROM sync_queue ORDER BY timestamp ASC'
+    );
+
+    return result.map((row: any) => ({
+      id: row.id,
+      operation: row.operation as 'create' | 'update' | 'delete',
+      table: row.table_name,
+      record_id: row.record_id,
+      data: JSON.parse(row.data),
+      timestamp: row.timestamp,
+      retry_count: row.retry_count,
+      last_error: row.last_error,
+    }));
+  }
+
+  async removeSyncQueueItem(id: string): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.runAsync('DELETE FROM sync_queue WHERE id = ?', [id]);
+  }
+
+  async incrementRetryCount(id: string, error?: string): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.runAsync(
+      'UPDATE sync_queue SET retry_count = retry_count + 1, last_error = ? WHERE id = ?',
+      [error || null, id]
+    );
+  }
+
+  // Settings operations
+  async getSetting(key: string): Promise<any> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.getFirstAsync(
+      'SELECT value FROM settings WHERE key = ?',
+      [key]
+    ) as any;
+
+    if (!result) return null;
+
+    try {
+      return JSON.parse(result.value);
+    } catch {
+      return result.value;
+    }
+  }
+
+  async setSetting(key: string, value: any): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
+
+    await this.db.runAsync(
+      'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
+      [key, serializedValue]
+    );
+  }
+
+  async clearAllData(): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.execAsync(`
+      DELETE FROM events;
+      DELETE FROM sync_queue;
+      DELETE FROM settings;
+    `);
+  }
+
+  private getEventType(event: Event): string {
+    if ('method' in event) return 'feed';
+    if ('pee' in event) return 'diaper';
+    if ('start' in event) return 'sleep';
+    if ('name' in event) return 'vitamin';
+    if ('kg' in event) return 'weight';
+    if ('cm' in event) return 'height';
+    return 'other';
+  }
+}
+
+export const mobileDb = new MobileDatabase();
