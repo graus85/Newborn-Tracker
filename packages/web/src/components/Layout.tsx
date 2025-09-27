@@ -1,11 +1,11 @@
-import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
-import { Header } from '@components/Header';
-import { BottomNavigation } from '@/components/BottomNavigation';
-import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { EventModal } from '@/components/modals/EventModal';
-import { useAuthStore } from '@/stores/authStore';
-import { useModalStore } from '@/stores/modalStore';
+import React from "react";
+import { Outlet, Navigate } from "react-router-dom";
+import { Header } from "@components/Header";
+import { BottomNavigation } from "@/components/BottomNavigation";
+import { FloatingActionButton } from "@/components/FloatingActionButton";
+import { EventModal } from "@/components/modals/EventModal";
+import { useAuthStore } from "@/stores/authStore'";
+import { useModalStore } from "@/stores/modalStore";
 
 export function Layout() {
   const { isAuthenticated } = useAuthStore();
