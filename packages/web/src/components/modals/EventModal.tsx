@@ -1,6 +1,6 @@
 import React from "react";
 
-const EventModal: React.FC<{ open?: boolean; onClose?: () => void }> = ({ open, onClose, children }) => {
+export const EventModal: React.FC<{ open?: boolean; onClose?: () => void }> = ({ open, onClose, children }) => {
   if (!open) return null;
   return (
     <div className="modal">
@@ -11,5 +11,3 @@ const EventModal: React.FC<{ open?: boolean; onClose?: () => void }> = ({ open, 
     </div>
   );
 };
-
-export default EventModal;
