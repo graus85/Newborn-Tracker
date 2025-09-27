@@ -1,33 +1,52 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background-color: #f5f5f5;
+  background: #f6f8fa;
 }
 
-.App {
-  text-align: center;
-  padding: 20px;
-}
-
-header {
-  background-color: #218085;
-  color: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+h1 {
+  margin-top: 32px;
+  color: #218085;
+  font-size: 2.2em;
 }
 
 button {
-  background-color: #218085;
-  color: white;
+  background: #218085;
+  color: #fff;
   border: none;
-  padding: 12px 24px;
-  margin: 8px;
   border-radius: 6px;
-  cursor: pointer;
+  padding: 10px 18px;
+  margin: 6px;
   font-size: 16px;
+  cursor: pointer;
 }
 
 button:hover {
-  background-color: #1a6b6e;
+  background: #156567;
+}
+
+.event-type-btn {
+  background: #f1f5f9;
+  border: 1px solid #e0e0e0;
+  color: #218085;
+  border-radius: 6px;
+  margin: 3px;
+  padding: 8px 13px;
+}
+
+.stats-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 18px 0;
+  box-shadow: 0 4px 8px #0001;
+}
+
+@media (max-width: 700px) {
+  h1 {
+    font-size: 1.5em;
+  }
+  .stats-section {
+    padding: 10px;
+  }
 }
