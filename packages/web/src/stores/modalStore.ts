@@ -9,5 +9,5 @@ interface ModalStore {
 export const useModalStore = create<ModalStore>((set) => ({
   isOpen: false,
   open: () => set({ isOpen: true }),
-  close: () => set({ isOpen: false })
+  close: () => set({ isOpen: false }),
 }));
