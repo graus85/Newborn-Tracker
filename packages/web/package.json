@@ -4,7 +4,7 @@
   "description": "Cross-platform baby tracking application with offline-first architecture",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/web/*"
   ],
   "scripts": {
     "dev": "pnpm run --parallel dev",
