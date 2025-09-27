@@ -28,7 +28,7 @@ export default defineConfig({
       manifest: {
         name: 'Baby Tracker',
         short_name: 'BabyTracker',
-        description: 'Track your baby\'s daily activities and health',
+        description: "Track your baby's daily activities and health",
         theme_color: '#218085',
         background_color: '#fcfcf9',
         display: 'standalone',
@@ -37,43 +37,40 @@ export default defineConfig({
         start_url: '/',
         categories: ['health', 'lifestyle', 'productivity'],
         icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
         ],
       },
-      devOptions: {
-        enabled: true,
-      },
+      devOptions: { enabled: true },
     }),
   ],
+
+  /* ---------- QUI aggiungiamo tutti gli alias ---------- */
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@/': `${path.resolve(__dirname, 'src')}/`,            // alias già presente
       '@baby/domain': path.resolve(__dirname, '../domain/src'),
+
+      // nuovi alias per evitare errori Rollup:
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@pages':       path.resolve(__dirname, 'src/pages'),
+      '@stores':      path.resolve(__dirname, 'src/stores'),
+      '@providers':   path.resolve(__dirname, 'src/providers'),
+      '@modals':      path.resolve(__dirname, 'src/components/modals'),
     },
   },
+
   server: {
     port: 3000,
     host: true,
   },
+
   build: {
     target: 'esnext',
     sourcemap: true,
   },
+
   test: {
     globals: true,
     environment: 'jsdom',
