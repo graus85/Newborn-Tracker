@@ -1,5 +1,5 @@
 {
-  "name": "baby-tracker",
+  "name": "baby-tracker-web",
   "version": "1.0.0",
   "description": "Cross-platform baby tracking application with offline-first architecture",
   "private": true,
